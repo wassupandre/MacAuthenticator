@@ -599,11 +599,79 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var rows = [CodeRow]()
     var timer: Timer?
 
+    // Desenha o ícone vetorial do cadeado Apple para a barra de menus (Template Image)
+    private func makeStatusBarIcon() -> NSImage {
+        let size = NSSize(width: 18, height: 18)
+        let image = NSImage(size: size, flipped: true) { rect in
+            let w = rect.width
+            let h = rect.height
+            NSColor.black.setFill()
+            NSColor.black.setStroke()
+
+            // 1. Corpo da maçã
+            let bodyPoints: [(CGFloat, CGFloat)] = [
+                (0.1961, 0.3333), (0.1569, 0.3824), (0.1275, 0.4510), (0.1275, 0.4804),
+                (0.1176, 0.4902), (0.1176, 0.6176), (0.1275, 0.6275), (0.1275, 0.6765),
+                (0.1569, 0.7647), (0.2059, 0.8627), (0.2647, 0.9412), (0.3137, 0.9804),
+                (0.3431, 0.9902), (0.3725, 0.9902), (0.4608, 0.9510), (0.5588, 0.9510),
+                (0.6176, 0.9804), (0.7059, 0.9804), (0.7255, 0.9706), (0.8137, 0.8725),
+                (0.8725, 0.7451), (0.7745, 0.6569), (0.7451, 0.5784), (0.7549, 0.4706),
+                (0.7745, 0.4314), (0.8431, 0.3627), (0.8431, 0.3529), (0.7745, 0.2941),
+                (0.7157, 0.2745), (0.6275, 0.2745), (0.5000, 0.3235), (0.3725, 0.2745),
+                (0.3137, 0.2745), (0.2549, 0.2941)
+            ]
+
+            let bodyPath = NSBezierPath()
+            for (index, pt) in bodyPoints.enumerated() {
+                let p = NSPoint(x: pt.0 * w, y: pt.1 * h)
+                if index == 0 {
+                    bodyPath.move(to: p)
+                } else {
+                    bodyPath.line(to: p)
+                }
+            }
+            bodyPath.close()
+            bodyPath.fill()
+
+            // 2. Haste do cadeado no topo
+            let cx = 0.5025 * w
+            let cy = 0.1740 * h
+            let r = 0.1446 * w
+            let k = 0.55228475 * r
+            let yBottom = 0.2500 * h
+
+            let shacklePath = NSBezierPath()
+            shacklePath.lineWidth = 0.062 * w
+            shacklePath.lineCapStyle = .butt
+            shacklePath.move(to: NSPoint(x: cx - r, y: yBottom))
+            shacklePath.line(to: NSPoint(x: cx - r, y: cy))
+            shacklePath.curve(
+                to: NSPoint(x: cx, y: cy - r),
+                controlPoint1: NSPoint(x: cx - r, y: cy - k),
+                controlPoint2: NSPoint(x: cx - k, y: cy - r)
+            )
+            shacklePath.curve(
+                to: NSPoint(x: cx + r, y: cy),
+                controlPoint1: NSPoint(x: cx + k, y: cy - r),
+                controlPoint2: NSPoint(x: cx + r, y: cy - k)
+            )
+            shacklePath.line(to: NSPoint(x: cx + r, y: yBottom))
+            shacklePath.stroke()
+
+            return true
+        }
+
+        // Template image faz o macOS adaptar a cor automaticamente entre Dark Mode e Light Mode
+        image.isTemplate = true
+        image.accessibilityDescription = "MacAuthenticator"
+        return image
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "lock.fill", accessibilityDescription: "MacAuthenticator")
+            button.image = makeStatusBarIcon()
             button.target = self
             button.action = #selector(handleStatusBarClick)
             // Habilita o disparo da action tanto no clique esquerdo quanto no direito

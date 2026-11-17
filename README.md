@@ -2,7 +2,7 @@
 
 Autenticador 2FA minimalista e nativo para a barra de menus do macOS, escrito em **Swift puro em um único arquivo** e sem nenhuma dependência externa.
 
-![Interface do MacAuthenticator na barra de menus do macOS](docs/screenshot.png)
+![Interface do MacAuthenticator na barra de menus do macOS](sample.webp)
 
 ## Sobre o Projeto
 
